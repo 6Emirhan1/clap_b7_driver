@@ -120,6 +120,7 @@ namespace clap_b7{
                 std::memcpy(&gnss_pos_, data, sizeof(BestGnssPos));
                 auto custom_msg = msg_wrapper_.create_gps_pos_msg(gnss_pos_, params_.get_gnss_frame());
                 auto sensor_msg = msg_wrapper_.create_nav_sat_fix_msg(gnss_pos_, params_.get_gnss_frame(), params_.get_altitude_mode());
+                sensor_msg.altitude = 0.0;
                 if(!clap_b7::ClapMsgWrapper::is_ins_active(ins_pvax_)){
                     publishers_.publish_nav_sat_fix(sensor_msg);
                 }
@@ -140,6 +141,7 @@ namespace clap_b7{
                 std::memcpy(&ins_pvax_, data, sizeof(InsPvax));
                 if(clap_b7::ClapMsgWrapper::is_ins_active(ins_pvax_)){
                     auto std_msg = msg_wrapper_.create_nav_sat_fix_msg(ins_pvax_, params_.get_gnss_frame(), params_.get_altitude_mode());
+                    std_msg.altitude = 0.0;
                     publishers_.publish_nav_sat_fix(std_msg);
                     /*
                      * ODOM
@@ -150,10 +152,10 @@ namespace clap_b7{
                         double z = NAN;
                         try{
                             if(params_.get_use_local_origin()){
-                                ll_to_utm_transform_.transform_local(ins_pvax_.latitude, ins_pvax_.longitude, ins_pvax_.height, x, y, z);
+                                ll_to_utm_transform_.transform_local(ins_pvax_.latitude, ins_pvax_.longitude, 0, x, y, z);
                             }
                             else{
-                                ll_to_utm_transform_.transform_global(ins_pvax_.latitude, ins_pvax_.longitude, ins_pvax_.height, x, y, z);
+                                ll_to_utm_transform_.transform_global(ins_pvax_.latitude, ins_pvax_.longitude, 0, x, y, z);
                             }
 
                         }
